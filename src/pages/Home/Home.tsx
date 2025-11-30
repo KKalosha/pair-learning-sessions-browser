@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import debounce from "lodash.debounce";
 import { fetchSessions, triggerNextError } from "@/utils/fetchSessions";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { Session } from "@/types/Session";
 import styles from "./Home.module.scss";
 
@@ -8,7 +8,8 @@ export default function Home() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
+  const [queryInput, setQueryInput] = useState("");
+  const debouncedQuery = useDebouncedValue(queryInput, 300);
 
   const loadSessions = async () => {
     setLoading(true);
@@ -27,18 +28,11 @@ export default function Home() {
     loadSessions();
   }, []);
 
-  const handleSearch = useMemo(
-    () =>
-      debounce((value: string) => {
-        setQuery(value);
-      }, 300),
-    []
-  );
 
-  const filteredSessions = useMemo(() => {
-    const q = query.trim().toLowerCase();
+  const visibleSessions = useMemo(() => {
+    const q = debouncedQuery.trim().toLowerCase();
     return sessions.filter((s) => s.title.toLowerCase().includes(q));
-  }, [sessions, query]);
+  }, [sessions, debouncedQuery]);
 
   if (loading) {
     return (
@@ -67,8 +61,10 @@ export default function Home() {
             type="search"
             placeholder="Search by title..."
             aria-label="Search sessions"
-            onChange={(e) => handleSearch(e.target.value)}
+            value={queryInput}
+            onChange={(e) => setQueryInput(e.target.value)}
           />
+
           <button
             onClick={() => {
               triggerNextError();
@@ -81,7 +77,7 @@ export default function Home() {
       </header>
 
       <ul className={styles.list} role="list">
-        {filteredSessions.map((s) => (
+        {visibleSessions.map((s) => (
           <li key={s.id} className={styles.item}>
             <strong>{s.title}</strong>
           </li>
