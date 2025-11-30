@@ -23,6 +23,7 @@ export function SessionCard({ session, query = "", onToggle }: Props) {
         <button
           type="button"
           aria-pressed={completed}
+          aria-label={completed ? "Mark as incomplete" : "Mark as completed"}
           onClick={handleToggle}
           className={styles.toggle}
         >

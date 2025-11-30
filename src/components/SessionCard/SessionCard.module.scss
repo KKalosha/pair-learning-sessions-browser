@@ -62,3 +62,8 @@ mark {
   color: #222;
   font-weight: 500;
 }
+
+.toggle:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
