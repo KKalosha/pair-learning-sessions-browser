@@ -1,0 +1,57 @@
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fafafa;
+  transition: background 0.2s ease;
+}
+
+.completed {
+  background: #e6f7e6;
+  opacity: 0.9;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.toggle {
+  background: none;
+  border: 1px solid #888;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+
+  &:hover {
+    background: #eee;
+  }
+}
+
+.row {
+  margin: 0.25rem 0;
+}
+
+.badge {
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+
+  &.beginner {
+    background: #4caf50;
+  }
+  &.intermediate {
+    background: #ff9800;
+  }
+  &.advanced {
+    background: #f44336;
+  }
+}
+
+mark {
+  background: #ffe58f;
+}
