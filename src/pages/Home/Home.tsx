@@ -1,45 +1,59 @@
-import { useEffect, useMemo, useState } from "react";
-import { fetchSessions, triggerNextError } from "@/utils/fetchSessions";
-import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import type { Session } from "@/types/Session";
-import styles from "./Home.module.scss";
+import { useEffect, useMemo, useState } from 'react'
+import { fetchSessions, triggerNextError } from '@/utils/fetchSessions'
+import { useDebouncedValue } from '@/hooks/useDebouncedValue'
+import type { Session } from '@/types/Session'
+import styles from './Home.module.scss'
 
 export default function Home() {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [queryInput, setQueryInput] = useState("");
-  const debouncedQuery = useDebouncedValue(queryInput, 300);
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [queryInput, setQueryInput] = useState('')
+  const [sortAsc, setSortAsc] = useState(false)
+  const debouncedQuery = useDebouncedValue(queryInput, 300)
 
   const loadSessions = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const data = await fetchSessions();
-      setSessions(data);
+      const data = await fetchSessions()
+      setSessions(data)
     } catch (err) {
-      setError((err as Error).message);
+      setError((err as Error).message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    loadSessions();
-  }, []);
+    loadSessions()
+  }, [])
 
 
   const visibleSessions = useMemo(() => {
-    const q = debouncedQuery.trim().toLowerCase();
-    return sessions.filter((s) => s.title.toLowerCase().includes(q));
-  }, [sessions, debouncedQuery]);
+    const q = debouncedQuery.trim().toLowerCase()
+    const filtered = sessions.filter((s) =>
+      s.title.toLowerCase().includes(q)
+    )
+
+    const sorted = [...filtered].sort((a, b) => {
+      if (a.popularity === b.popularity) {
+        return a.title.localeCompare(b.title)
+      }
+      return sortAsc
+        ? a.popularity - b.popularity
+        : b.popularity - a.popularity
+    })
+
+    return sorted
+  }, [sessions, debouncedQuery, sortAsc])
 
   if (loading) {
     return (
       <div role="status" aria-busy="true" className={styles.state}>
         Loading sessions...
       </div>
-    );
+    )
   }
 
   if (error) {
@@ -48,7 +62,7 @@ export default function Home() {
         <p>Something went wrong: {error}</p>
         <button onClick={loadSessions}>Retry</button>
       </div>
-    );
+    )
   }
 
   return (
@@ -65,10 +79,14 @@ export default function Home() {
             onChange={(e) => setQueryInput(e.target.value)}
           />
 
+          <button onClick={() => setSortAsc((prev) => !prev)}>
+            Sort: {sortAsc ? 'Ascending' : 'Descending'}
+          </button>
+
           <button
             onClick={() => {
-              triggerNextError();
-              loadSessions();
+              triggerNextError()
+              loadSessions()
             }}
           >
             Simulate Error
@@ -79,10 +97,10 @@ export default function Home() {
       <ul className={styles.list} role="list">
         {visibleSessions.map((s) => (
           <li key={s.id} className={styles.item}>
-            <strong>{s.title}</strong>
+            <strong>{s.title}</strong> — Popularity: {s.popularity}
           </li>
         ))}
       </ul>
     </main>
-  );
+  )
 }
