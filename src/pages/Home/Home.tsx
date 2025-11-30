@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { fetchSessions, triggerNextError } from '@/utils/fetchSessions'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import type { Session } from '@/types/Session'
+import { SessionCard } from '@/components/SessionCard/SessionCard'
 import styles from './Home.module.scss'
 
 export default function Home() {
@@ -29,6 +30,13 @@ export default function Home() {
     loadSessions()
   }, [])
 
+  const toggleCompleted = (id: string) => {
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === id ? { ...s, completed: !s.completed } : s
+      )
+    )
+  }
 
   const visibleSessions = useMemo(() => {
     const q = debouncedQuery.trim().toLowerCase()
@@ -96,9 +104,12 @@ export default function Home() {
 
       <ul className={styles.list} role="list">
         {visibleSessions.map((s) => (
-          <li key={s.id} className={styles.item}>
-            <strong>{s.title}</strong> — Popularity: {s.popularity}
-          </li>
+          <SessionCard
+            key={s.id}
+            session={s}
+            onToggle={toggleCompleted}
+            query={debouncedQuery}
+          />
         ))}
       </ul>
     </main>
